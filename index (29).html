@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0A1F44">
+<title>Society Maintenance App</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f3f5f9;color:#1b2333;font-size:14px}
+.hdr{background:#0A1F44;color:#fff;padding:10px 12px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:5}
+.hdr .t{flex:1;min-width:0}
+.hdr .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr .t span{font-size:11px;opacity:.8}
+.hdr button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:5px 8px;font-size:12px}
+.tabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid #dde2ea;position:sticky;top:52px;z-index:4}
+.tabs button{flex:0 0 auto;border:0;background:none;padding:10px 12px;font-size:13px;color:#56617a;border-bottom:3px solid transparent}
+.tabs button.on{color:#0A1F44;font-weight:600;border-bottom-color:#F2A900}
+.wrap{padding:10px;max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #e1e5ec;border-radius:8px;padding:10px;margin-bottom:10px}
+.card h3{margin:0 0 8px;font-size:14px;color:#0A1F44}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+@media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:#fff;border:1px solid #e1e5ec;border-radius:8px;padding:8px 10px}
+.kpi small{color:#6b7488;font-size:11px;display:block}
+.kpi b{font-size:17px}
+.kpi.hl{background:#0A1F44;color:#fff;border-color:#0A1F44}.kpi.hl small{color:#F2A900}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#eef1f6;text-align:left;padding:6px;font-size:12px;color:#3c4760;white-space:nowrap}
+td{padding:6px;border-top:1px solid #edf0f4;vertical-align:top}
+td.r,th.r{text-align:right;white-space:nowrap}
+tfoot td{font-weight:700;background:#fafbfd}
+.tw{overflow-x:auto}
+label{display:block;font-size:12px;color:#56617a;margin:8px 0 3px}
+input,select,textarea{width:100%;padding:8px;border:1px solid #c9d0db;border-radius:6px;font-size:14px;background:#fff;font-family:inherit}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{border:1px solid #c9d0db;background:#fff;border-radius:6px;padding:8px 12px;font-size:13px;cursor:pointer}
+.btn.pri{background:#0A1F44;color:#fff;border-color:#0A1F44}
+.btn.amb{background:#F2A900;color:#0A1F44;border-color:#F2A900;font-weight:600}
+.btn.red{color:#c0392b;border-color:#e3b3ad}
+.btn.wa{background:#25D366;color:#fff;border-color:#25D366}
+.btn.sm{padding:4px 8px;font-size:12px}
+.btn.big{width:100%;padding:11px;font-size:15px;margin-top:12px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid #c9d0db;border-radius:16px;padding:6px 10px;font-size:12px;background:#fff}
+.chip.on{background:#0A1F44;color:#fff;border-color:#0A1F44}
+.chip.paid{background:#e4f5ea;color:#1e7c43;border-color:#b6e0c4}
+.muted{color:#6b7488}.small{font-size:11px}
+.ok{color:#1e7c43;font-weight:600}.due{color:#c0392b;font-weight:600}
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:#eef1f6}
+.grid12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media(min-width:640px){.grid12{grid-template-columns:repeat(6,1fr)}}
+.mcell{border-radius:6px;padding:6px;text-align:center;font-size:12px;border:1px solid #e1e5ec}
+.mcell.p{background:#e4f5ea;border-color:#b6e0c4}.mcell.d{background:#fdecea;border-color:#f3c2bc}.mcell.n{background:#f6f7f9;color:#a0a7b5}
+.cbar{height:8px;background:#F2A900;border-radius:4px}
+.login{max-width:380px;margin:30px auto;background:#fff;border-radius:10px;padding:20px;border:1px solid #e1e5ec;text-align:center}
+.login label,.login input,.login select{text-align:left}
+.login h2{margin:6px 0 2px;color:#0A1F44;font-size:18px}
+.seg{display:flex;margin:14px 0 4px;border:1px solid #0A1F44;border-radius:6px;overflow:hidden}
+.seg button{flex:1;border:0;padding:8px;background:#fff;color:#0A1F44;font-size:13px}
+.seg button.on{background:#0A1F44;color:#fff}
+#ov{position:fixed;inset:0;background:rgba(10,31,68,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#ov.on{display:flex}
+#ov .box{background:#fff;border-radius:10px;padding:16px;max-width:420px;width:100%;max-height:92vh;overflow:auto}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1b2333;color:#fff;padding:8px 14px;border-radius:6px;font-size:13px;display:none;z-index:60}
+.foot{text-align:center;font-size:11px;color:#98a0b0;padding:16px}
+@media print{.hdr button,.tabs,.bar,.noprint,.foot{display:none!important}.hdr{position:static}body{background:#fff}.card{border:0}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov"><div class="box" id="ovb"></div></div>
+<div id="toast"></div>
+<script>
+/* ===================== APP SETTINGS ===================== */
+const FB = { projectId: "society-maintenance-19c4b", apiKey: "AIzaSyCR8Dw0iQVOJcw6NvjFmXUdWjXGfqIwZLc" };
+const SUPER_EMAIL = "sales01@entrix.co.in";      // app owner (ENTRIX) — sees all societies
+const SUPPORT_WA = "919552552667";               // renewal / support WhatsApp
+const TRIAL_DAYS = 30;                           // free trial for new societies
+const OWNER_DOMAIN = "owner.society-app.in";     // internal login id domain for flat owners
+/* ======================================================== */
+
+const CATS = ["Watchman / Security","Housekeeping / Cleaning","Electricity (Common)","Water Supply","Lift Maintenance","Repairs & Maintenance","Garden","Pest Control","Office / Stationery","Bank Charges","Other"];
+const MODES = ["Cash","UPI","Cheque","Bank Transfer"];
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr = n => { const v = Math.round(+n || 0); return (v < 0 ? "-₹" : "₹") + Math.abs(v).toLocaleString("en-IN"); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const curYM = () => today().slice(0, 7);
+const ymL = ym => ym ? MN[+ym.slice(5) - 1] + " " + ym.slice(2, 4) : "";
+const dL = d => d ? d.slice(8, 10) + "-" + MN[+d.slice(5, 7) - 1] + "-" + d.slice(2, 4) : "";
+const sum = a => a.reduce((s, x) => s + (+x.amount || 0), 0);
+const digits = s => String(s || "").replace(/\D/g, "");
+function monthsBetween(a, b) { const out = []; if (!a || !b || a > b) return out; let [y, m] = a.split("-").map(Number); const [by, bm] = b.split("-").map(Number); while (y < by || (y === by && m <= bm)) { out.push(y + "-" + String(m).padStart(2, "0")); m++; if (m > 12) { m = 1; y++; } } return out; }
+const byNo = (a, b) => String(a.no).localeCompare(String(b.no), undefined, { numeric: true });
+
+/* ---------- data ---------- */
+function blank() { return { settings: { name: "My Society", address: "", regNo: "", openingBalance: 0, start: curYM(), cats: CATS.slice(), ts: 0 }, flats: [], payments: [], expenses: [], notices: [], updatedAt: 0 }; }
+let CODE = null;
+const LSK = () => "socMaint_" + CODE;
+function loadLocal() { try { const x = JSON.parse(localStorage.getItem(LSK())); if (x && x.settings) return x; } catch (e) {} return null; }
+function saveLocal() { if (CODE) try { localStorage.setItem(LSK(), JSON.stringify(D)); } catch (e) {} }
+let D = blank();
+const L = k => (D[k] || []).filter(x => !x.del);
+const flatById = id => D.flats.find(f => f.id === id);
+const cats = () => (D.settings.cats && D.settings.cats.length) ? D.settings.cats : CATS;
+
+function merge(a, b) {
+  const o = blank();
+  for (const k of ["flats", "payments", "expenses", "notices"]) {
+    const m = new Map();
+    for (const x of (a[k] || [])) m.set(x.id, x);
+    for (const x of (b[k] || [])) { const y = m.get(x.id); if (!y || (x.ts || 0) >= (y.ts || 0)) m.set(x.id, x); }
+    o[k] = [...m.values()];
+  }
+  o.settings = Object.assign(blank().settings, ((b.settings?.ts || 0) >= (a.settings?.ts || 0)) ? b.settings : a.settings);
+  o.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
+  return o;
+}
+
+/* ---------- Firebase Auth (REST) ---------- */
+const IT = p => `https://identitytoolkit.googleapis.com/v1/accounts:${p}?key=${FB.apiKey}`;
+function authMsg(m) {
+  m = String(m || "");
+  if (m.startsWith("EMAIL_EXISTS")) return "EMAIL_EXISTS";
+  if (/INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(m)) return "Wrong login details";
+  if (m.startsWith("WEAK_PASSWORD")) return "Password must be at least 6 characters";
+  if (m.startsWith("INVALID_EMAIL")) return "Invalid email";
+  if (m.startsWith("TOO_MANY_ATTEMPTS")) return "Too many attempts — try again after some time";
+  if (m.startsWith("USER_DISABLED")) return "This login is disabled";
+  if (m.startsWith("OPERATION_NOT_ALLOWED")) return "Email/Password login not enabled in Firebase";
+  return m || "Network error";
+}
+async function idt(p, body) {
+  let r; try { r = await fetch(IT(p), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); } catch (e) { throw new Error("No internet connection"); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(authMsg(j.error && j.error.message));
+  return j;
+}
+let AU = null; try { AU = JSON.parse(localStorage.getItem("socAuth")); } catch (e) {}
+function setAuth(j) {
+  AU = { uid: j.localId || j.user_id, email: j.email || (AU && AU.email) || "", idToken: j.idToken || j.id_token, refresh: j.refreshToken || j.refresh_token, exp: Date.now() + (+(j.expiresIn || j.expires_in) || 3600) * 1000 };
+  localStorage.setItem("socAuth", JSON.stringify(AU));
+}
+function jwt() { try { return JSON.parse(atob(AU.idToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); } catch (e) { return {}; } }
+async function token() {
+  if (!AU) throw new Error("Please login again");
+  if (Date.now() > AU.exp - 120000) {
+    const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FB.apiKey}`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(AU.refresh) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { if (r.status === 400) { logout(); throw new Error("Session expired — please login again"); } throw new Error("No internet connection"); }
+    setAuth(j);
+  }
+  return AU.idToken;
+}
+
+/* ---------- Firestore (REST) ---------- */
+const FSU = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/`;
+async function fs(method, path, body, qs) {
+  const tk = await token();
+  let r; try { r = await fetch(FSU + path + (qs ? "?" + qs : ""), { method, headers: { Authorization: "Bearer " + tk, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); } catch (e) { throw new Error("No internet connection"); }
+  if (r.status === 404 && method === "GET") return null;
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error((j.error && j.error.message) || ("HTTP " + r.status)); e.status = r.status; throw e; }
+  return j;
+}
+function enc(o) {
+  const f = {};
+  for (const k in o) { const v = o[k]; f[k] = v instanceof Date ? { timestampValue: v.toISOString() } : typeof v === "boolean" ? { booleanValue: v } : typeof v === "number" ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v }) : { stringValue: String(v ?? "") }; }
+  return { fields: f };
+}
+function dec(doc) {
+  const o = {}, f = (doc && doc.fields) || {};
+  for (const k in f) { const v = f[k]; o[k] = "stringValue" in v ? v.stringValue : "booleanValue" in v ? v.booleanValue : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue : "timestampValue" in v ? v.timestampValue : null; }
+  return o;
+}
+const isSuperEmail = () => AU && String(AU.email).toLowerCase() === SUPER_EMAIL.toLowerCase();
+
+/* ---------- society data sync ---------- */
+let SY = { st: "busy", at: null }, SUB = null, PV = { pins: {} };
+async function pull() {
+  const j = await fs("GET", "societies/" + CODE);
+  const s = j && dec(j).json;
+  if (s) { D = merge(D, JSON.parse(s)); saveLocal(); }
+}
+async function push(overwrite) {
+  saveLocal(); SY.st = "busy"; drawSync();
+  try {
+    if (!overwrite) await pull();
+    await fs("PATCH", "societies/" + CODE, enc({ json: JSON.stringify(D), updatedAt: new Date() }));
+    SY = { st: "ok", at: new Date() };
+    syncMeta();
+  } catch (e) {
+    SY = { st: "err", msg: e.message };
+    toast(e.status === 403 ? (subActive() ? "Permission denied — not saved" : "Subscription expired — not saved") : "Saved on phone; will sync when online");
+  }
+  drawSync();
+}
+async function syncMeta() {
+  const n = L("flats").length;
+  if (SUB && (SUB.flats !== n || SUB.name !== D.settings.name)) {
+    SUB.flats = n; SUB.name = D.settings.name;
+    try { await fs("PATCH", "codes/" + CODE, enc({ name: SUB.name, flats: n }), "updateMask.fieldPaths=name&updateMask.fieldPaths=flats"); } catch (e) {}
+  }
+}
+async function loadSub() { try { const j = await fs("GET", "codes/" + CODE); if (j) SUB = dec(j); } catch (e) {} }
+async function loadPV() { try { const j = await fs("GET", `societies/${CODE}/private/pins`); PV = j ? JSON.parse(dec(j).json || '{"pins":{}}') : { pins: {} }; if (!PV.pins) PV.pins = {}; } catch (e) {} }
+async function savePV() { await fs("PATCH", `societies/${CODE}/private/pins`, enc({ json: JSON.stringify(PV) })); }
+const subActive = () => !SUB || (SUB.active !== false && new Date(SUB.validTill) > new Date());
+const subDaysLeft = () => SUB ? Math.ceil((new Date(SUB.validTill) - new Date()) / 864e5) : 999;
+async function refresh(show) {
+  if (!S) return;
+  if (S.role === "super") return loadSupers(show);
+  SY.st = "busy"; drawSync();
+  const before = D.updatedAt;
+  try {
+    await Promise.all([pull(), loadSub(), S.role === "admin" ? loadPV() : null]);
+    SY = { st: "ok", at: new Date() }; if (show) toast("Updated");
+  } catch (e) { SY = { st: "err", msg: e.message }; if (show) toast(e.message); }
+  if (show || D.updatedAt !== before) render(); else drawSync();
+}
+function syncText() {
+  if (SY.st === "busy") return "⏳ Syncing…";
+  if (SY.st === "err") return "⚠️ Offline — saved data";
+  return "☁️ Synced " + (SY.at ? SY.at.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "");
+}
+function drawSync() { const e = $("#sy"); if (e) e.textContent = syncText(); }
+/* ---------- photos (each photo = its own cloud document, so main data stays small) ---------- */
+const PHC = {};
+function compressImg(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      let q = 0.65, max = 1100, out;
+      for (let i = 0; i < 4; i++) {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        out = c.toDataURL("image/jpeg", q);
+        if (out.length < 600000) break;
+        q -= 0.15; max -= 250;
+      }
+      URL.revokeObjectURL(u); res(out);
+    };
+    img.onerror = () => rej(new Error("Not an image"));
+    img.src = u;
+  });
+}
+async function putPhoto(id, data) {
+  PHC[id] = data;
+  try { await fs("PATCH", `societies/${CODE}/photos/${id}`, enc({ data })); }
+  catch (e) { delete PHC[id]; throw new Error(e.status === 403 ? "Not allowed (subscription?)" : "Upload failed — " + e.message); }
+}
+async function getPhoto(id) {
+  if (PHC[id]) return PHC[id];
+  const j = await fs("GET", `societies/${CODE}/photos/${id}`);
+  const d = j && dec(j).data;
+  if (d) PHC[id] = d;
+  return d;
+}
+function dropPhoto(id) { if (!id) return; delete PHC[id]; fs("DELETE", `societies/${CODE}/photos/${id}`).catch(() => {}); }
+let UPL = false;
+const FORMS = { get EF() { return EF; }, get NF() { return NF; } };
+async function pickPhoto(inp, form) {
+  const file = inp.files[0]; inp.value = ""; if (!file) return;
+  if (!subActive()) return commit();
+  UPL = true; render();
+  try {
+    const data = await compressImg(file), id = "ph" + uid();
+    await putPhoto(id, data);
+    FORMS[form].photo = id; toast("Photo attached");
+  } catch (e) { toast(e.message); }
+  UPL = false; render();
+}
+function photoField(form) {
+  const F = FORMS[form];
+  return `<label>Photo (bill / notice image) — optional</label>
+    ${F.photo ? `<div class="bar"><button class="btn sm" onclick="viewPhoto('${F.photo}')">📎 View photo</button><button class="btn sm red" onclick="${form}.photo='';render()">Remove</button></div>`
+      : UPL ? `<div class="muted small">⏳ Uploading photo…</div>`
+      : `<div class="bar"><button class="btn sm" onclick="$('#ph_cam').click()">📷 Camera</button><button class="btn sm" onclick="$('#ph_gal').click()">🖼 Gallery</button></div>
+         <input type="file" id="ph_cam" accept="image/*" capture="environment" style="display:none" onchange="pickPhoto(this,'${form}')">
+         <input type="file" id="ph_gal" accept="image/*" style="display:none" onchange="pickPhoto(this,'${form}')">`}`;
+}
+async function viewPhoto(id) {
+  $("#ovb").innerHTML = `<div class="muted">⏳ Loading photo…</div>`; $("#ov").classList.add("on");
+  let d = null; try { d = await getPhoto(id); } catch (e) {}
+  $("#ovb").innerHTML = d ? `<img src="${d}" style="width:100%;max-height:70vh;object-fit:contain;border-radius:6px"><div class="row" style="margin-top:10px"><button class="btn" onclick="sharePhoto('${id}')">📤 Share</button><button class="btn pri" onclick="closeOv()">Close</button></div>`
+    : `<div>Photo not available (check internet).</div><button class="btn pri big" onclick="closeOv()">Close</button>`;
+}
+async function sharePhoto(id) {
+  const d = await getPhoto(id); if (!d) return;
+  const blob = await (await fetch(d)).blob(), file = new File([blob], "society_photo.jpg", { type: "image/jpeg" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); } catch (e) {} }
+  else { const a = document.createElement("a"); a.href = d; a.download = "society_photo.jpg"; a.click(); }
+}
+
+function commit(msg) {
+  if (!subActive()) { D = loadLocal() || D; render(); ask(`<b>Subscription expired</b> on ${dL(String(SUB.validTill).slice(0, 10))}.<br><br>You can view data, but adding or editing is locked. Please renew with ENTRIX.`, "Renew on WhatsApp", renewWA); return; }
+  D.updatedAt = Date.now(); saveLocal(); render(); if (msg) toast(msg); push();
+}
+function renewWA() { window.open("https://wa.me/" + SUPPORT_WA + "?text=" + encodeURIComponent(`Hello ENTRIX, please renew Society Maintenance App subscription.\nSociety: ${D.settings.name}\nSociety Code: ${CODE}`), "_blank"); }
+function busy(msg) { if (msg) { $("#ovb").innerHTML = `<div style="text-align:center;padding:10px">⏳ ${esc(msg)}</div>`; $("#ov").classList.add("on"); } else closeOv(); }
+
+/* ---------- UI helpers ---------- */
+function toast(m) { const t = $("#toast"); t.textContent = m; t.style.display = "block"; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = "none", 2200); }
+function ask(msg, okLabel, cb, danger) {
+  $("#ovb").innerHTML = `<div style="margin-bottom:14px">${msg}</div><div class="row"><button class="btn" onclick="closeOv()">Cancel</button><button class="btn ${danger ? "red" : "pri"}" id="ovok">${esc(okLabel)}</button></div>`;
+  $("#ov").classList.add("on");
+  $("#ovok").onclick = () => { closeOv(); cb(); };
+}
+function closeOv() { $("#ov").classList.remove("on"); }
+function openWA(mobile, text) {
+  let m = digits(mobile); if (m.length === 10) m = "91" + m;
+  window.open("https://wa.me/" + m + "?text=" + encodeURIComponent(text), "_blank");
+}
+function download(name, text, type) {
+  const b = new Blob([text], { type: type || "text/plain" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+const csvCell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+function downloadCSV(name, rows) { download(name, "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n"), "text/csv"); }
+
+/* ---------- business logic ---------- */
+function paidSet(flatId) { const s = new Set(); L("payments").forEach(p => { if (p.flatId === flatId && p.type !== "O") (p.months || []).forEach(m => s.add(m)); }); return s; }
+function duesOf(f) {
+  const start = f.start || D.settings.start || curYM();
+  const paid = paidSet(f.id);
+  const months = monthsBetween(start, curYM()).filter(m => !paid.has(m));
+  return { months, amount: months.length * (+f.amt || 0) };
+}
+function totals() {
+  const P = L("payments"), E = L("expenses"), ob = +D.settings.openingBalance || 0;
+  const col = sum(P), sp = sum(E);
+  return { ob, col, sp, bal: ob + col - sp };
+}
+function nextRno() { let mx = 0; D.payments.forEach(p => { const n = parseInt(String(p.rno || "").replace(/\D/g, "")) || 0; if (n > mx) mx = n; }); return "R-" + String(mx + 1).padStart(4, "0"); }
+
+/* ---------- session ---------- */
+let S = null; try { S = JSON.parse(localStorage.getItem("socS")); } catch (e) {}
+if (!AU) S = null;
+let TAB = (S && S.tab) || "dash", LM = "o";
+function saveS() { if (S) { S.tab = TAB; localStorage.setItem("socS", JSON.stringify(S)); } }
+function setTab(t) { TAB = t; if (t === "notice" && S && S.role === "owner") { try { localStorage.setItem(seenKey(), String(Date.now())); } catch (e) {} } saveS(); render(); window.scrollTo(0, 0); }
+const slug = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const ownerEmail = (no, code) => `${slug(no)}.${String(code || CODE).toLowerCase()}@${OWNER_DOMAIN}`;
+const val = id => ($("#" + id) ? $("#" + id).value.trim() : "");
+
+async function doLogin() {
+  try {
+    if (LM === "o") {
+      const code = val("lc").toUpperCase(), no = val("lf"), pin = val("lp");
+      if (!code || !no || !pin) return toast("Enter Society Code, Flat No. and PIN");
+      localStorage.setItem("socLastCode", code);
+      busy("Logging in…");
+      setAuth(await idt("signInWithPassword", { email: ownerEmail(no, code), password: pin, returnSecureToken: true }));
+    } else {
+      const em = val("le"), pw = val("lp");
+      if (!em || !pw) return toast("Enter email and password");
+      busy("Logging in…");
+      setAuth(await idt("signInWithPassword", { email: em, password: pw, returnSecureToken: true }));
+    }
+    await afterAuth();
+  } catch (e) { busy(); toast(e.message === "Wrong login details" && LM === "o" ? "Wrong Society Code / Flat No. / PIN" : e.message); }
+}
+async function afterAuth() {
+  if (isSuperEmail()) {
+    if (!jwt().email_verified) {
+      try { await idt("sendOobCode", { requestType: "VERIFY_EMAIL", idToken: AU.idToken }); } catch (e) {}
+      busy(); AU = null; localStorage.removeItem("socAuth");
+      return ask(`A verification email has been sent to <b>${esc(SUPER_EMAIL)}</b>.<br><br>Open it, tap the link, then login again.`, "OK", () => {});
+    }
+    S = { role: "super" }; TAB = "super"; saveS(); busy(); render(); loadSupers(); return;
+  }
+  const m = await fs("GET", "members/" + AU.uid);
+  if (!m) { busy(); throw new Error("This login is not linked to any society"); }
+  const md = dec(m);
+  CODE = md.code; S = { role: md.role, flatId: md.flatId || "", code: CODE }; TAB = "dash";
+  D = loadLocal() || blank();
+  await Promise.all([pull(), loadSub(), md.role === "admin" ? loadPV() : null]);
+  SY = { st: "ok", at: new Date() }; saveS(); busy(); render();
+}
+async function doRegister() {
+  const name = val("rn"), code = val("rc").toUpperCase(), person = val("rp"), mob = val("rm"), em = val("re").toLowerCase(), pw = val("rw"), pw2 = val("rw2");
+  if (em === SUPER_EMAIL.toLowerCase()) {
+    if (pw.length < 6 || pw !== pw2) return toast("Password min 6 characters, both must match");
+    try { busy("Creating owner account…"); let j; try { j = await idt("signUp", { email: em, password: pw, returnSecureToken: true }); } catch (e) { if (e.message !== "EMAIL_EXISTS") throw e; j = await idt("signInWithPassword", { email: em, password: pw, returnSecureToken: true }); } setAuth(j); await afterAuth(); } catch (e) { busy(); toast(e.message); }
+    return;
+  }
+  if (!name) return toast("Enter society name");
+  if (!/^[A-Z0-9]{4,12}$/.test(code)) return toast("Society Code: 4–12 letters/numbers, no spaces");
+  if (!person || digits(mob).length < 10) return toast("Enter your name and 10-digit mobile");
+  if (!/^\S+@\S+\.\S+$/.test(em)) return toast("Enter valid email");
+  if (pw.length < 6) return toast("Password must be at least 6 characters");
+  if (pw !== pw2) return toast("Passwords do not match");
+  try {
+    busy("Registering society…");
+    let j;
+    try { j = await idt("signUp", { email: em, password: pw, returnSecureToken: true }); }
+    catch (e) { if (e.message !== "EMAIL_EXISTS") throw e; j = await idt("signInWithPassword", { email: em, password: pw, returnSecureToken: true }).catch(() => { throw new Error("This email is already registered — use Committee login"); }); }
+    setAuth(j);
+    if (await fs("GET", "members/" + AU.uid).catch(() => null)) throw new Error("This email already manages a society — use Committee login");
+    const till = new Date(Date.now() + TRIAL_DAYS * 864e5);
+    try { await fs("PATCH", "codes/" + code, enc({ name, ownerUid: AU.uid, email: em, mobile: digits(mob), contact: person, created: new Date(), validTill: till, active: true, flats: 0 }), "currentDocument.exists=false"); }
+    catch (e) { const mine = await fs("GET", "codes/" + code).catch(() => null); if (!mine || dec(mine).ownerUid !== AU.uid) throw new Error("Society Code " + code + " is already taken — choose another"); }
+    await fs("PATCH", "members/" + AU.uid, enc({ code, role: "admin" }));
+    CODE = code; D = blank(); D.settings.name = name; D.settings.ts = Date.now(); D.updatedAt = Date.now();
+    await fs("PATCH", "societies/" + code, enc({ json: JSON.stringify(D), updatedAt: new Date() }));
+    localStorage.setItem("socLastCode", code);
+    await afterAuth();
+    ask(`<b>${esc(name)}</b> registered!<br><br>Society Code: <b style="font-size:18px">${esc(code)}</b><br>Free trial till <b>${dL(till.toISOString().slice(0, 10))}</b>.<br><br>Next: add flats in the <b>Flats</b> tab — each owner gets a login automatically.`, "Add Flats", () => setTab("flats"));
+  } catch (e) { busy(); toast(e.message); }
+}
+async function forgotPw() {
+  const em = val("le");
+  if (!/^\S+@\S+\.\S+$/.test(em)) return toast("Type your email above first");
+  try { await idt("sendOobCode", { requestType: "PASSWORD_RESET", email: em }); ask(`Password reset link sent to <b>${esc(em)}</b> (check spam folder too).`, "OK", () => {}); } catch (e) { toast(e.message); }
+}
+function logout() {
+  if (CODE) try { localStorage.removeItem(LSK()); } catch (e) {}
+  S = null; AU = null; CODE = null; SUB = null; PV = { pins: {} }; D = blank(); LM = "o";
+  localStorage.removeItem("socS"); localStorage.removeItem("socAuth"); render();
+}
+
+/* ---------- views ---------- */
+function render() {
+  const app = $("#app");
+  if (S && S.role === "owner" && !flatById(S.flatId)) { if (!D.flats.length) { app.innerHTML = `<div class="login"><div class="muted">⏳ Loading society data…</div><button class="btn big" onclick="refresh(true)">Retry</button><button class="btn big" onclick="logout()">Logout</button></div>`; return; } app.innerHTML = `<div class="login"><h2>Flat removed</h2><div class="muted">Your flat is no longer in this society's list. Contact the committee.</div><button class="btn pri big" onclick="logout()">Logout</button></div>`; return; }
+  if (!S) { app.innerHTML = loginView(); return; }
+  if (S.role === "super") { app.innerHTML = superView(); return; }
+  const admin = S.role === "admin";
+  const tabs = admin
+    ? [["dash", "🏠 Home"], ["collect", "💰 Collect"], ["exp", "🧾 Expenses"], ["notice", "📢 Notices"], ["dues", "⏳ Dues"], ["flats", "🏢 Flats"], ["rep", "📊 Reports"], ["set", "⚙️ Settings"]]
+    : [["dash", "🏠 Home"], ["notice", "📢 Notices" + (unread() ? ` <span class="pill" style="background:#F2A900;color:#0A1F44">${unread()}</span>` : "")], ["mine", "💳 My Payments"], ["exp", "🧾 Expenses"], ["rep", "📊 Reports"]];
+  if (!tabs.some(t => t[0] === TAB)) TAB = "dash";
+  const fl = flatById(S.flatId);
+  const who = admin ? "Committee" : "Flat " + esc(fl ? fl.no : "");
+  const V = { dash: dashView, collect: collectView, exp: expView, dues: duesView, flats: flatsView, rep: repView, set: setView, mine: mineView, notice: noticeView }[TAB];
+  let banner = "";
+  if (admin && SUB) {
+    const dl = subDaysLeft();
+    if (!subActive()) banner = `<div class="noprint" style="background:#fdecea;color:#c0392b;padding:8px 12px;font-size:13px">⛔ Subscription expired — view only. <button class="btn sm" onclick="renewWA()">Renew</button></div>`;
+    else if (dl <= 7) banner = `<div class="noprint" style="background:#fff4d6;color:#7a5a00;padding:8px 12px;font-size:13px">⚠️ Subscription ends in ${dl} day(s) (${dL(String(SUB.validTill).slice(0, 10))}). <button class="btn sm" onclick="renewWA()">Renew</button></div>`;
+  }
+  app.innerHTML = `<div class="hdr"><div class="t"><b>${esc(D.settings.name)}</b><span>${who} · ${esc(CODE)} · <span id="sy">${syncText()}</span></span></div>
+    <button onclick="refresh(true)">⟳</button><button onclick="logout()">Logout</button></div>${banner}
+    <div class="tabs">${tabs.map(t => `<button class="${t[0] === TAB ? "on" : ""}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join("")}</div>
+    <div class="wrap">${V()}</div><div class="foot">Society Maintenance App · Powered by ENTRIX Innovation</div>`;
+}
+
+function loginView() {
+  const seg = `<div class="seg"><button class="${LM === "o" ? "on" : ""}" onclick="LM='o';render()">Flat Owner</button><button class="${LM === "a" ? "on" : ""}" onclick="LM='a';render()">Committee</button><button class="${LM === "r" ? "on" : ""}" onclick="LM='r';render()">Register</button></div>`;
+  let body;
+  if (LM === "o") body = `<label>Society Code</label><input id="lc" autocapitalize="characters" value="${esc(localStorage.getItem("socLastCode") || "")}" placeholder="e.g. GREENPARK">
+    <label>Flat No.</label><input id="lf" placeholder="e.g. A-101">
+    <label>PIN (6 digits — sent by your committee)</label><input id="lp" type="password" inputmode="numeric" maxlength="12" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn pri big" onclick="doLogin()">Login</button>`;
+  else if (LM === "a") body = `<label>Email</label><input id="le" type="email" autocomplete="username">
+    <label>Password</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn pri big" onclick="doLogin()">Login</button>
+    <div style="margin-top:10px"><button class="btn sm" onclick="forgotPw()">Forgot password?</button></div>`;
+  else body = `<div class="muted small" style="margin-bottom:4px">Register your society — ${TRIAL_DAYS}-day free trial</div>
+    <label>Society Name</label><input id="rn" placeholder="e.g. Green Park Co-op Housing Society" oninput="if(!$('#rc').dataset.t)$('#rc').value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10)">
+    <label>Society Code (owners will use this to login)</label><input id="rc" autocapitalize="characters" oninput="this.dataset.t=1;this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" maxlength="12">
+    <div class="row"><div><label>Your Name (Secretary)</label><input id="rp"></div><div><label>Mobile</label><input id="rm" inputmode="tel"></div></div>
+    <label>Email (your login id)</label><input id="re" type="email" autocomplete="username">
+    <div class="row"><div><label>Password</label><input id="rw" type="password" autocomplete="new-password"></div><div><label>Confirm</label><input id="rw2" type="password" autocomplete="new-password"></div></div>
+    <button class="btn amb big" onclick="doRegister()">Register Society</button>`;
+  return `<div class="login"><div style="font-size:40px">🏢</div><h2>Society Maintenance</h2>
+  <div class="muted">Payments · Expenses · Notices — full transparency</div>${seg}${body}</div>
+  <div class="foot">Powered by ENTRIX Innovation · <a href="https://wa.me/${SUPPORT_WA}" target="_blank">Support</a></div>`;
+}
+
+/* ----- App owner (ENTRIX) panel ----- */
+let SUPS = [], SQ = "";
+async function loadSupers(show) {
+  try {
+    const out = []; let pt = "";
+    do { const j = await fs("GET", "codes", null, "pageSize=300" + (pt ? "&pageToken=" + pt : "")); (j && j.documents || []).forEach(d => out.push(Object.assign({ code: d.name.split("/").pop() }, dec(d)))); pt = j && j.nextPageToken; } while (pt);
+    SUPS = out; SY = { st: "ok", at: new Date() }; if (show) toast("Updated");
+  } catch (e) { SY = { st: "err" }; toast(e.message); }
+  render();
+}
+function superView() {
+  const now = new Date(), q = SQ.toLowerCase();
+  const rows = SUPS.filter(s => !q || (s.code + " " + s.name + " " + s.contact + " " + s.mobile + " " + s.email).toLowerCase().includes(q)).sort((a, b) => String(a.validTill).localeCompare(String(b.validTill)));
+  const st = s => s.active === false ? ["Off", "due"] : new Date(s.validTill) < now ? ["Expired", "due"] : (new Date(s.validTill) - now) < 7 * 864e5 ? ["Expiring", "due"] : ["Active", "ok"];
+  const cnt = k => SUPS.filter(s => st(s)[0] === k).length;
+  return `<div class="hdr"><div class="t"><b>ENTRIX · App Owner Panel</b><span>${esc(AU.email)} · <span id="sy">${syncText()}</span></span></div><button onclick="refresh(true)">⟳</button><button onclick="logout()">Logout</button></div>
+  <div class="wrap"><div class="kpis"><div class="kpi hl"><small>Societies</small><b>${SUPS.length}</b></div><div class="kpi"><small>Active</small><b class="ok">${cnt("Active")}</b></div>
+  <div class="kpi"><small>Expiring ≤7 days</small><b class="due">${cnt("Expiring")}</b></div><div class="kpi"><small>Expired / Off</small><b class="due">${cnt("Expired") + cnt("Off")}</b></div></div>
+  <div class="card"><input placeholder="Search code, name, mobile…" value="${esc(SQ)}" oninput="SQ=this.value;clearTimeout(window._sq);window._sq=setTimeout(()=>{render();const i=document.querySelector('.card input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},300)">
+  <div class="tw" style="margin-top:8px"><table><thead><tr><th>Society</th><th>Contact</th><th class="r">Flats</th><th>Valid till</th></tr></thead><tbody>
+  ${rows.map(s => { const [t, c] = st(s); return `<tr><td><b>${esc(s.code)}</b><br>${esc(s.name)}<br><span class="muted small">Since ${dL(String(s.created).slice(0, 10))}</span></td>
+    <td>${esc(s.contact)}<br><span class="muted small">${esc(s.mobile)}<br>${esc(s.email)}</span></td><td class="r">${s.flats || 0}</td>
+    <td><span class="${c}">${t}</span><br>${dL(String(s.validTill).slice(0, 10))}</td></tr>
+    <tr><td colspan="4" style="border-top:0;padding-top:0"><div class="bar" style="margin:0"><button class="btn sm" onclick="supExtend('${s.code}',1)">+1 Month</button><button class="btn sm amb" onclick="supExtend('${s.code}',12)">+1 Year</button>
+    <input type="date" title="Set exact date" style="width:140px;padding:4px" onchange="supDate('${s.code}',this.value)">
+    <button class="btn sm ${s.active === false ? "" : "red"}" onclick="supToggle('${s.code}')">${s.active === false ? "Turn On" : "Turn Off"}</button> ${s.mobile ? `<button class="btn sm wa" onclick="openWA('${esc(s.mobile)}','Hello ${esc(s.contact)}, regarding your Society Maintenance App (${esc(s.code)}) subscription — ')">WA</button>` : ""}</div></td></tr>`; }).join("") || `<tr><td colspan="4" class="muted">No societies yet.</td></tr>`}
+  </tbody></table></div></div></div><div class="foot">Powered by ENTRIX Innovation</div>`;
+}
+async function supSet(code, fields) {
+  try { busy("Saving…"); await fs("PATCH", "codes/" + code, enc(fields), Object.keys(fields).map(k => "updateMask.fieldPaths=" + k).join("&")); Object.assign(SUPS.find(s => s.code === code), fields instanceof Object ? Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, v instanceof Date ? v.toISOString() : v])) : {}); busy(); toast("Updated " + code); render(); }
+  catch (e) { busy(); toast(e.message); }
+}
+function supExtend(code, months) {
+  const s = SUPS.find(x => x.code === code), base = new Date(Math.max(Date.now(), new Date(s.validTill).getTime() || 0));
+  base.setMonth(base.getMonth() + months);
+  ask(`Extend <b>${esc(code)}</b> till <b>${dL(base.toISOString().slice(0, 10))}</b>?`, "Extend", () => supSet(code, { validTill: base, active: true }));
+}
+function supDate(code, v) { if (!v) return; const d = new Date(v + "T23:59:00"); ask(`Set <b>${esc(code)}</b> valid till <b>${dL(v)}</b>?`, "Set", () => supSet(code, { validTill: d })); }
+function supToggle(code) { const s = SUPS.find(x => x.code === code), on = s.active === false; ask(`${on ? "Turn ON" : "Turn OFF"} society <b>${esc(code)}</b>?`, on ? "Turn On" : "Turn Off", () => supSet(code, { active: on }), !on); }
+
+function kpis() {
+  const t = totals(), ym = curYM();
+  const cm = sum(L("payments").filter(p => (p.date || "").slice(0, 7) === ym));
+  const em = sum(L("expenses").filter(e => (e.date || "").slice(0, 7) === ym));
+  return `<div class="kpis">
+    <div class="kpi hl"><small>Balance with Society</small><b>${inr(t.bal)}</b></div>
+    <div class="kpi"><small>Total Collected</small><b class="ok">${inr(t.col)}</b></div>
+    <div class="kpi"><small>Total Spent</small><b class="due">${inr(t.sp)}</b></div>
+    <div class="kpi"><small>${ymL(ym)}: In / Out</small><b style="font-size:14px">${inr(cm)} / ${inr(em)}</b></div></div>
+    ${t.ob ? `<div class="muted small" style="margin:-4px 0 8px">Includes opening balance ${inr(t.ob)}</div>` : ""}`;
+}
+
+function expTable(list, withActions) {
+  if (!list.length) return `<div class="muted">No expenses recorded.</div>`;
+  return `<div class="tw"><table><thead><tr><th>Date</th><th>Work / Description</th><th>Paid To</th><th class="r">Amount</th>${withActions ? "<th></th>" : ""}</tr></thead><tbody>
+  ${list.map(e => `<tr><td>${dL(e.date)}</td><td><b>${esc(e.desc || e.cat)}</b><br><span class="pill">${esc(e.cat)}</span> <span class="muted small">${esc(e.mode)}${e.ref ? " · " + esc(e.ref) : ""}</span>${e.photo ? ` <button class="btn sm" onclick="viewPhoto('${e.photo}')">📎 Bill</button>` : ""}</td><td>${esc(e.payee)}</td><td class="r">${inr(e.amount)}</td>
+  ${withActions ? `<td class="r"><button class="btn sm" onclick="editExp('${e.id}')">Edit</button> <button class="btn sm red" onclick="delExp('${e.id}')">✕</button></td>` : ""}</tr>`).join("")}
+  </tbody><tfoot><tr><td colspan="3">Total (${list.length})</td><td class="r">${inr(sum(list))}</td>${withActions ? "<td></td>" : ""}</tr></tfoot></table></div>`;
+}
+const sortDesc = (a, b) => (b.date || "").localeCompare(a.date || "") || (b.ts || 0) - (a.ts || 0);
+
+function dashView() {
+  const nl = noticeList().slice(0, 2);
+  let h = nl.length ? `<div class="card" style="border-left:4px solid #F2A900"><h3>📢 Latest Notices</h3>${nl.map(n => `<div style="margin-bottom:8px"><b>${n.pin ? "📌 " : ""}${esc(n.title)}</b> <span class="muted small">${dL(n.date)}</span><div class="small" style="white-space:pre-wrap">${esc(n.body.length > 160 ? n.body.slice(0, 160) + "…" : n.body)}</div></div>`).join("")}<button class="btn sm" onclick="setTab('notice')">All notices →</button></div>` : "";
+  h += kpis();
+  if (S.role === "owner") {
+    const f = flatById(S.flatId), d = duesOf(f);
+    h += `<div class="card"><h3>My Maintenance — Flat ${esc(f.no)}</h3>
+      <div>${esc(f.owner)} · ${inr(f.amt)}/month</div>
+      ${d.months.length ? `<div class="due" style="margin-top:6px">Pending ${d.months.length} month(s): ${inr(d.amount)}</div><div class="muted small">${d.months.map(ymL).join(", ")}</div>` : `<div class="ok" style="margin-top:6px">✓ All dues paid up to ${ymL(curYM())}</div>`}
+      <div class="bar"><button class="btn sm" onclick="setTab('mine')">View my receipts →</button></div></div>`;
+  } else {
+    const fl = L("flats"); let pend = 0, cnt = 0;
+    fl.forEach(f => { const d = duesOf(f); if (d.amount > 0) { pend += d.amount; cnt++; } });
+    h += `<div class="card"><h3>Dues Position</h3><div>${fl.length} flats · <span class="due">${cnt} with pending dues · ${inr(pend)}</span></div>
+      <div class="bar"><button class="btn sm amb" onclick="setTab('collect')">+ Collect Payment</button><button class="btn sm" onclick="setTab('exp')">+ Add Expense</button><button class="btn sm" onclick="setTab('dues')">See Dues</button></div></div>`;
+  }
+  h += `<div class="card"><h3>Where society money was spent (latest)</h3>${expTable(L("expenses").sort(sortDesc).slice(0, 8), false)}
+    <div class="bar"><button class="btn sm" onclick="setTab('exp')">All expenses →</button></div></div>`;
+  return h;
+}
+
+/* ----- My payments (owner) ----- */
+let MY = new Date().getFullYear();
+function mineView() {
+  const f = flatById(S.flatId), paid = paidSet(f.id), start = f.start || D.settings.start, cy = curYM();
+  const P = L("payments").filter(p => p.flatId === f.id).sort(sortDesc);
+  const years = new Set([new Date().getFullYear()]); P.forEach(p => (p.months || []).forEach(m => years.add(+m.slice(0, 4)))); if (start) years.add(+start.slice(0, 4));
+  let g = "";
+  for (let i = 1; i <= 12; i++) {
+    const ym = MY + "-" + String(i).padStart(2, "0");
+    const cls = paid.has(ym) ? "p" : (ym >= start && ym <= cy ? "d" : "n");
+    g += `<div class="mcell ${cls}"><b>${MN[i - 1]}</b><br>${cls === "p" ? "✓ Paid" : cls === "d" ? "Due" : "—"}</div>`;
+  }
+  return `<div class="card"><h3>Flat ${esc(f.no)} · ${esc(f.owner)}</h3>
+    <div class="bar"><label style="margin:0">Year</label><select style="width:auto" onchange="MY=+this.value;render()">${[...years].sort().map(y => `<option ${y === MY ? "selected" : ""}>${y}</option>`).join("")}</select></div>
+    <div class="grid12">${g}</div></div>
+    <div class="card"><h3>My Receipts</h3>${P.length ? `<div class="tw"><table><thead><tr><th>Receipt</th><th>Date</th><th>For</th><th class="r">Amount</th></tr></thead><tbody>
+    ${P.map(p => `<tr><td>${esc(p.rno)}</td><td>${dL(p.date)}</td><td>${p.type === "O" ? esc(p.note) : (p.months || []).map(ymL).join(", ")}<br><span class="muted small">${esc(p.mode)}${p.ref ? " · " + esc(p.ref) : ""}</span></td><td class="r">${inr(p.amount)}</td></tr>`).join("")}
+    </tbody><tfoot><tr><td colspan="3">Total paid</td><td class="r">${inr(sum(P))}</td></tr></tfoot></table></div>` : `<div class="muted">No payments yet.</div>`}</div>`;
+}
+
+/* ----- Collect (admin) ----- */
+let CF = null;
+function newCF() { const f = L("flats").sort(byNo)[0]; return { id: null, type: "M", flatId: f ? f.id : "", year: new Date().getFullYear(), months: [], amount: "", date: today(), mode: "UPI", ref: "", note: "" }; }
+let PF = { m: "" };
+function collectView() {
+  if (!CF) CF = newCF();
+  const flats = L("flats").sort(byNo);
+  if (!flats.length) return `<div class="card">Add flats first in the <b>Flats</b> tab.<div class="bar"><button class="btn pri" onclick="setTab('flats')">Go to Flats</button></div></div>`;
+  const f = flatById(CF.flatId);
+  const editing = CF.id ? D.payments.find(p => p.id === CF.id) : null;
+  const paid = f ? paidSet(f.id) : new Set();
+  if (editing) (editing.months || []).forEach(m => paid.delete(m));
+  let chips = "";
+  if (CF.type === "M" && f) {
+    for (let i = 1; i <= 12; i++) {
+      const ym = CF.year + "-" + String(i).padStart(2, "0");
+      if (paid.has(ym)) chips += `<span class="chip paid">${MN[i - 1]} ✓</span>`;
+      else chips += `<button class="chip ${CF.months.includes(ym) ? "on" : ""}" onclick="cfMonth('${ym}')">${MN[i - 1]}</button>`;
+    }
+  }
+  const d = f ? duesOf(f) : null;
+  let list = L("payments").sort(sortDesc);
+  if (PF.m) list = list.filter(p => (p.date || "").slice(0, 7) === PF.m);
+  const pm = [...new Set(L("payments").map(p => (p.date || "").slice(0, 7)))].sort().reverse();
+  return `<div class="card"><h3>${editing ? "Edit Receipt " + esc(editing.rno) : "Collect Payment"}</h3>
+    <div class="seg" style="margin-top:0"><button class="${CF.type === "M" ? "on" : ""}" onclick="CF.type='M';render()">Maintenance</button><button class="${CF.type === "O" ? "on" : ""}" onclick="CF.type='O';CF.months=[];render()">Other Income</button></div>
+    <label>Flat ${CF.type === "O" ? "(optional)" : ""}</label>
+    <select onchange="CF.flatId=this.value;CF.months=[];cfAuto();render()">${CF.type === "O" ? `<option value="">— None —</option>` : ""}${flats.map(x => `<option value="${x.id}" ${x.id === CF.flatId ? "selected" : ""}>${esc(x.no)} — ${esc(x.owner)}</option>`).join("")}</select>
+    ${CF.type === "M" && f ? `<div class="muted small" style="margin-top:4px">${inr(f.amt)}/month · ${d.months.length ? `<span class="due">Pending: ${d.months.map(ymL).join(", ")}</span>` : `<span class="ok">No dues</span>`}</div>
+      <div class="bar"><label style="margin:0">Year</label><select style="width:auto" onchange="CF.year=+this.value;render()">${[-2, -1, 0, 1].map(o => { const y = new Date().getFullYear() + o; return `<option ${y === CF.year ? "selected" : ""}>${y}</option>`; }).join("")}</select>
+      ${d.months.length ? `<button class="btn sm" onclick="CF.months=duesOf(flatById(CF.flatId)).months;cfAuto();render()">Select all pending</button>` : ""}</div>
+      <div class="chips">${chips}</div>
+      <div class="muted small" style="margin-top:4px">Selected: ${CF.months.length ? CF.months.sort().map(ymL).join(", ") : "none"}</div>` : ""}
+    ${CF.type === "O" ? `<label>Income description</label><input value="${esc(CF.note)}" oninput="CF.note=this.value" placeholder="e.g. Late fee, Hall rent, Bank interest">` : ""}
+    <div class="row"><div><label>Amount ₹</label><input id="cfa" inputmode="decimal" value="${esc(CF.amount)}" oninput="CF.amount=this.value"></div><div><label>Date</label><input type="date" value="${CF.date}" onchange="CF.date=this.value"></div></div>
+    <div class="row"><div><label>Mode</label><select onchange="CF.mode=this.value">${MODES.map(m => `<option ${m === CF.mode ? "selected" : ""}>${m}</option>`).join("")}</select></div><div><label>UTR / Cheque No.</label><input value="${esc(CF.ref)}" oninput="CF.ref=this.value"></div></div>
+    ${CF.type === "M" ? `<label>Note (optional)</label><input value="${esc(CF.note)}" oninput="CF.note=this.value">` : ""}
+    <div class="row" style="margin-top:12px">${editing ? `<button class="btn" onclick="CF=newCF();render()">Cancel</button>` : ""}<button class="btn amb" onclick="savePay()">${editing ? "Update" : "Save Receipt"}</button></div></div>
+    <div class="card"><h3>Receipts</h3>
+    <div class="bar"><select style="width:auto" onchange="PF.m=this.value;render()"><option value="">All months</option>${pm.map(m => `<option value="${m}" ${m === PF.m ? "selected" : ""}>${ymL(m)}</option>`).join("")}</select></div>
+    ${list.length ? `<div class="tw"><table><thead><tr><th>Rcpt</th><th>Date</th><th>Flat / For</th><th class="r">Amount</th><th></th></tr></thead><tbody>
+    ${list.map(p => { const fl = flatById(p.flatId); return `<tr><td>${esc(p.rno)}</td><td>${dL(p.date)}</td><td><b>${fl ? esc(fl.no) : "—"}</b> ${fl ? esc(fl.owner) : ""}<br><span class="muted small">${p.type === "O" ? "Other: " + esc(p.note) : (p.months || []).map(ymL).join(", ")} · ${esc(p.mode)}</span></td><td class="r">${inr(p.amount)}</td>
+      <td class="r" style="white-space:nowrap">${fl && fl.mobile ? `<button class="btn sm wa" onclick="waReceipt('${p.id}')">WA</button> ` : ""}<button class="btn sm" onclick="editPay('${p.id}')">Edit</button> <button class="btn sm red" onclick="delPay('${p.id}')">✕</button></td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td colspan="3">Total (${list.length})</td><td class="r">${inr(sum(list))}</td><td></td></tr></tfoot></table></div>` : `<div class="muted">No receipts yet.</div>`}</div>`;
+}
+function cfAuto() { const f = flatById(CF.flatId); if (CF.type === "M" && f) CF.amount = CF.months.length ? String(CF.months.length * (+f.amt || 0)) : ""; }
+function cfMonth(ym) { const i = CF.months.indexOf(ym); if (i >= 0) CF.months.splice(i, 1); else CF.months.push(ym); cfAuto(); render(); }
+function savePay() {
+  const amt = +CF.amount;
+  if (CF.type === "M" && !CF.flatId) return toast("Select flat");
+  if (CF.type === "M" && !CF.months.length) return toast("Select month(s)");
+  if (CF.type === "O" && !CF.note.trim()) return toast("Enter income description");
+  if (!(amt > 0)) return toast("Enter amount");
+  if (!CF.date) return toast("Enter date");
+  const rec = { id: CF.id || uid(), type: CF.type, flatId: CF.flatId || "", months: CF.type === "M" ? CF.months.slice().sort() : [], amount: amt, date: CF.date, mode: CF.mode, ref: CF.ref.trim(), note: CF.note.trim(), ts: Date.now() };
+  if (CF.id) { const old = D.payments.find(p => p.id === CF.id); rec.rno = old.rno; Object.assign(old, rec); }
+  else { rec.rno = nextRno(); D.payments.push(rec); }
+  const isNew = !CF.id, fl = flatById(rec.flatId);
+  CF = newCF(); CF.flatId = rec.flatId || CF.flatId;
+  commit((isNew ? "Saved " : "Updated ") + rec.rno);
+  if (isNew && fl && fl.mobile) ask(`Receipt <b>${esc(rec.rno)}</b> saved for Flat ${esc(fl.no)} — ${inr(rec.amount)}.<br><br>Send receipt on WhatsApp to ${esc(fl.owner)}?`, "Send on WhatsApp", () => waReceipt(rec.id));
+}
+function editPay(id) { const p = D.payments.find(x => x.id === id); CF = { id, type: p.type || "M", flatId: p.flatId, year: +((p.months && p.months[0]) || p.date).slice(0, 4), months: (p.months || []).slice(), amount: String(p.amount), date: p.date, mode: p.mode, ref: p.ref || "", note: p.note || "" }; render(); window.scrollTo(0, 0); }
+function delPay(id) { const p = D.payments.find(x => x.id === id); ask(`Delete receipt <b>${esc(p.rno)}</b> (${inr(p.amount)})?`, "Delete", () => { p.del = true; p.ts = Date.now(); commit("Deleted"); }, true); }
+function waReceipt(id) {
+  const p = D.payments.find(x => x.id === id), f = flatById(p.flatId), s = D.settings;
+  const t = `*${s.name}*\nMaintenance Receipt *${p.rno}*\n\nFlat: ${f.no}\nName: ${f.owner}\nFor: ${p.type === "O" ? p.note : (p.months || []).map(ymL).join(", ")}\nAmount: ${inr(p.amount)}\nDate: ${dL(p.date)}\nMode: ${p.mode}${p.ref ? " (" + p.ref + ")" : ""}\n\nThank you.\nSee all payments & society expenses in the app.`;
+  openWA(f.mobile, t);
+}
+
+/* ----- Expenses ----- */
+let EF = null, XF = { m: "", c: "" };
+function newEF() { return { id: null, date: today(), cat: cats()[0], desc: "", payee: "", amount: "", mode: "Cash", ref: "", photo: "" }; }
+function expView() {
+  const admin = S.role === "admin";
+  if (admin && !EF) EF = newEF();
+  let list = L("expenses").sort(sortDesc);
+  const ms = [...new Set(list.map(e => (e.date || "").slice(0, 7)))].sort().reverse();
+  if (XF.m) list = list.filter(e => (e.date || "").slice(0, 7) === XF.m);
+  if (XF.c) list = list.filter(e => e.cat === XF.c);
+  let form = "";
+  if (admin) form = `<div class="card"><h3>${EF.id ? "Edit Expense" : "Add Expense (work paid from society fund)"}</h3>
+    <div class="row"><div><label>Date</label><input type="date" value="${EF.date}" onchange="EF.date=this.value"></div><div><label>Category</label><select onchange="EF.cat=this.value">${cats().map(c => `<option ${c === EF.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div></div>
+    <label>Work done / Description</label><input value="${esc(EF.desc)}" oninput="EF.desc=this.value" placeholder="e.g. Water tank cleaning, Nov watchman salary">
+    <div class="row"><div><label>Paid To</label><input value="${esc(EF.payee)}" oninput="EF.payee=this.value"></div><div><label>Amount ₹</label><input inputmode="decimal" value="${esc(EF.amount)}" oninput="EF.amount=this.value"></div></div>
+    <div class="row"><div><label>Mode</label><select onchange="EF.mode=this.value">${MODES.map(m => `<option ${m === EF.mode ? "selected" : ""}>${m}</option>`).join("")}</select></div><div><label>Bill / Voucher No.</label><input value="${esc(EF.ref)}" oninput="EF.ref=this.value"></div></div>
+    ${photoField("EF")}
+    <div class="row" style="margin-top:12px">${EF.id ? `<button class="btn" onclick="EF=newEF();render()">Cancel</button>` : ""}<button class="btn amb" onclick="saveExp()">${EF.id ? "Update" : "Save Expense"}</button></div></div>`;
+  return form + `<div class="card"><h3>Society Expenses</h3>
+    <div class="bar"><select style="width:auto" onchange="XF.m=this.value;render()"><option value="">All months</option>${ms.map(m => `<option value="${m}" ${m === XF.m ? "selected" : ""}>${ymL(m)}</option>`).join("")}</select>
+    <select style="width:auto" onchange="XF.c=this.value;render()"><option value="">All categories</option>${cats().map(c => `<option ${c === XF.c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div>
+    ${expTable(list, admin)}</div>`;
+}
+function saveExp() {
+  const amt = +EF.amount;
+  if (!EF.desc.trim()) return toast("Enter work / description");
+  if (!(amt > 0)) return toast("Enter amount");
+  if (!EF.date) return toast("Enter date");
+  if (UPL) return toast("Wait — photo uploading");
+  const rec = { id: EF.id || uid(), date: EF.date, cat: EF.cat, desc: EF.desc.trim(), payee: EF.payee.trim(), amount: amt, mode: EF.mode, ref: EF.ref.trim(), photo: EF.photo || "", ts: Date.now() };
+  if (EF.id) { const old = D.expenses.find(e => e.id === EF.id); if (old.photo && old.photo !== rec.photo) dropPhoto(old.photo); }
+  if (EF.id) Object.assign(D.expenses.find(e => e.id === EF.id), rec); else D.expenses.push(rec);
+  const up = !!EF.id; EF = newEF(); commit(up ? "Expense updated" : "Expense saved");
+}
+function editExp(id) { const e = D.expenses.find(x => x.id === id); EF = { id, date: e.date, cat: e.cat, desc: e.desc, payee: e.payee || "", amount: String(e.amount), mode: e.mode, ref: e.ref || "", photo: e.photo || "" }; render(); window.scrollTo(0, 0); }
+function delExp(id) { const e = D.expenses.find(x => x.id === id); ask(`Delete expense <b>${esc(e.desc)}</b> (${inr(e.amount)})?`, "Delete", () => { dropPhoto(e.photo); e.del = true; e.ts = Date.now(); commit("Deleted"); }, true); }
+
+/* ----- Notices ----- */
+let NF = null;
+function newNF() { return { id: null, date: today(), title: "", body: "", pin: false, photo: "" }; }
+const noticeList = () => L("notices").sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || sortDesc(a, b));
+const seenKey = () => "socSeen_" + (S && S.flatId);
+function unread() { let t = 0; try { t = +localStorage.getItem(seenKey()) || 0; } catch (e) {} return L("notices").filter(n => (n.ts || 0) > t).length; }
+function noticeView() {
+  const admin = S.role === "admin", list = noticeList();
+  if (admin && !NF) NF = newNF();
+  let h = admin ? `<div class="card"><h3>${NF.id ? "Edit Notice" : "New Notice / Circular"}</h3>
+    <div class="row"><div style="flex:2"><label>Title</label><input value="${esc(NF.title)}" oninput="NF.title=this.value" placeholder="e.g. Water supply off on Sunday"></div><div><label>Date</label><input type="date" value="${NF.date}" onchange="NF.date=this.value"></div></div>
+    <label>Message</label><textarea rows="4" oninput="NF.body=this.value">${esc(NF.body)}</textarea>
+    <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" style="width:auto" ${NF.pin ? "checked" : ""} onchange="NF.pin=this.checked"> 📌 Pin to top (important)</label>
+    ${photoField("NF")}
+    <div class="row" style="margin-top:12px">${NF.id ? `<button class="btn" onclick="NF=newNF();render()">Cancel</button>` : ""}<button class="btn amb" onclick="saveNotice()">${NF.id ? "Update" : "Post Notice"}</button></div></div>` : "";
+  h += `<div class="card"><h3>Notice Board (${list.length})</h3>${list.length ? list.map(n => `<div style="border-top:1px solid #edf0f4;padding:8px 0">
+      <div><b>${n.pin ? "📌 " : ""}${esc(n.title)}</b> <span class="muted small">${dL(n.date)}</span></div>
+      <div style="white-space:pre-wrap;margin:4px 0">${esc(n.body)}</div>
+      <div class="bar" style="margin:4px 0 0">${n.photo ? `<button class="btn sm" onclick="viewPhoto('${n.photo}')">📎 Photo</button>` : ""}
+      ${admin ? `<button class="btn sm wa" onclick="waNotice('${n.id}')">WhatsApp</button><button class="btn sm" onclick="editNotice('${n.id}')">Edit</button><button class="btn sm red" onclick="delNotice('${n.id}')">✕</button>` : ""}</div></div>`).join("") : `<div class="muted">No notices yet.</div>`}</div>`;
+  return h;
+}
+function saveNotice() {
+  if (!NF.title.trim()) return toast("Enter title");
+  if (UPL) return toast("Wait — photo uploading");
+  const rec = { id: NF.id || uid(), date: NF.date || today(), title: NF.title.trim(), body: NF.body.trim(), pin: !!NF.pin, photo: NF.photo || "", ts: Date.now() };
+  if (NF.id) { const old = D.notices.find(n => n.id === NF.id); if (old.photo && old.photo !== rec.photo) dropPhoto(old.photo); Object.assign(old, rec); }
+  else D.notices.push(rec);
+  const isNew = !NF.id; NF = newNF(); commit(isNew ? "Notice posted" : "Notice updated");
+  if (isNew) ask("Notice posted. Also send it to the society WhatsApp group?", "Open WhatsApp", () => waNotice(rec.id));
+}
+function editNotice(id) { const n = D.notices.find(x => x.id === id); NF = { id, date: n.date, title: n.title, body: n.body, pin: !!n.pin, photo: n.photo || "" }; render(); window.scrollTo(0, 0); }
+function delNotice(id) { const n = D.notices.find(x => x.id === id); ask(`Delete notice <b>${esc(n.title)}</b>?`, "Delete", () => { dropPhoto(n.photo); n.del = true; n.ts = Date.now(); commit("Deleted"); }, true); }
+function waNotice(id) {
+  const n = D.notices.find(x => x.id === id);
+  window.open("https://wa.me/?text=" + encodeURIComponent(`*${D.settings.name}*\n📢 *NOTICE* — ${dL(n.date)}\n\n*${n.title}*\n${n.body}\n\n— Managing Committee`), "_blank");
+}
+
+/* ----- Dues (admin) ----- */
+function duesView() {
+  const rows = L("flats").sort(byNo).map(f => ({ f, d: duesOf(f) }));
+  const pend = rows.filter(r => r.d.amount > 0);
+  return `<div class="card"><h3>Pending Dues up to ${ymL(curYM())}</h3>
+    <div class="muted small">${pend.length} of ${rows.length} flats pending · Total ${inr(pend.reduce((s, r) => s + r.d.amount, 0))}</div>
+    <div class="tw" style="margin-top:8px"><table><thead><tr><th>Flat</th><th>Owner</th><th>Pending Months</th><th class="r">Amount</th><th></th></tr></thead><tbody>
+    ${rows.map(({ f, d }) => `<tr><td><b>${esc(f.no)}</b></td><td>${esc(f.owner)}</td><td>${d.months.length ? `<span class="due">${d.months.length}</span> <span class="muted small">${d.months.map(ymL).join(", ")}</span>` : `<span class="ok">Clear</span>`}</td><td class="r">${d.amount ? inr(d.amount) : "—"}</td>
+      <td class="r" style="white-space:nowrap">${d.amount && f.mobile ? `<button class="btn sm wa" onclick="waRemind('${f.id}')">Remind</button> ` : ""}${d.amount ? `<button class="btn sm" onclick="collectFor('${f.id}')">Collect</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div></div>`;
+}
+function waRemind(id) {
+  const f = flatById(id), d = duesOf(f);
+  openWA(f.mobile, `*${D.settings.name}*\n\nDear ${f.owner} (Flat ${f.no}),\nGentle reminder: society maintenance is pending for ${d.months.map(ymL).join(", ")}.\nAmount due: *${inr(d.amount)}*\n\nPlease pay at the earliest. You can check society expenses and your payments in the app.\n\n— Managing Committee`);
+}
+function collectFor(id) { CF = newCF(); CF.flatId = id; CF.months = duesOf(flatById(id)).months; cfAuto(); setTab("collect"); }
+
+/* ----- Flats (admin) ----- */
+let FF = null;
+function newFF() { return { id: null, no: "", owner: "", mobile: "", amt: L("flats")[0] ? String(L("flats")[0].amt) : "", start: D.settings.start || curYM(), pin: "" }; }
+const appURL = () => location.href.split("#")[0].split("?")[0];
+function flatsView() {
+  if (!FF) FF = newFF();
+  const fl = L("flats").sort(byNo);
+  return `<div class="card"><h3>${FF.id ? "Edit Flat" : "Add Flat"}</h3>
+    <div class="row"><div><label>Flat No.</label><input value="${esc(FF.no)}" oninput="FF.no=this.value" placeholder="A-101"></div><div><label>Monthly ₹</label><input inputmode="decimal" value="${esc(FF.amt)}" oninput="FF.amt=this.value"></div></div>
+    <label>Owner Name</label><input value="${esc(FF.owner)}" oninput="FF.owner=this.value">
+    <div class="row"><div><label>Mobile (WhatsApp)</label><input inputmode="tel" value="${esc(FF.mobile)}" oninput="FF.mobile=this.value"></div><div><label>Dues from month</label><input type="month" value="${FF.start}" onchange="FF.start=this.value"></div></div>
+    <label>Owner login PIN (6+ digits · blank = last 6 digits of mobile)</label><input inputmode="numeric" value="${esc(FF.pin)}" oninput="FF.pin=this.value">
+    <div class="row" style="margin-top:12px">${FF.id ? `<button class="btn" onclick="FF=newFF();render()">Cancel</button>` : ""}<button class="btn amb" onclick="saveFlat()">${FF.id ? "Update" : "Add Flat"}</button></div></div>
+    <div class="card"><h3>Quick add many flats</h3><div class="muted small">Type flat numbers separated by comma or new line. Then tap Edit on each flat to add owner name & mobile — the owner login is created then.</div>
+    <textarea id="bulk" rows="2" placeholder="A-101, A-102, A-103, B-101"></textarea>
+    <div class="row"><div><label>Monthly ₹ for all</label><input id="bulkamt" inputmode="decimal"></div><div style="display:flex;align-items:flex-end"><button class="btn pri" style="width:100%" onclick="bulkAdd()">Add All</button></div></div></div>
+    <div class="card"><h3>Flats (${fl.length})</h3><div class="muted small" style="margin-bottom:6px">Owner login: Society Code <b>${esc(CODE)}</b> + Flat No. + PIN</div>${fl.length ? `<div class="tw"><table><thead><tr><th>Flat</th><th>Owner / Mobile</th><th class="r">Monthly</th><th>Login</th><th></th></tr></thead><tbody>
+    ${fl.map(f => { const p = PV.pins[f.id]; return `<tr><td><b>${esc(f.no)}</b></td><td>${esc(f.owner) || `<span class="muted">—</span>`}<br><span class="muted small">${esc(f.mobile)}</span></td><td class="r">${inr(f.amt)}<br><span class="muted small">from ${ymL(f.start)}</span></td>
+      <td>${p ? `<span class="ok">✓</span> <span class="small">PIN ${esc(p.pin)}</span>` : `<span class="muted small">Not set</span>`}</td>
+      <td class="r" style="white-space:nowrap">${p && f.mobile ? `<button class="btn sm wa" onclick="waLogin('${f.id}')">Send</button> ` : ""}<button class="btn sm" onclick="editFlat('${f.id}')">Edit</button> <button class="btn sm red" onclick="delFlat('${f.id}')">✕</button></td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td colspan="2">Monthly total</td><td class="r">${inr(fl.reduce((s, f) => s + (+f.amt || 0), 0))}</td><td colspan="2"></td></tr></tfoot></table></div>` : `<div class="muted">No flats yet.</div>`}</div>`;
+}
+async function setOwnerLogin(f, pin) {
+  const email = ownerEmail(f.no), old = PV.pins[f.id];
+  if (old && (old.email !== email || !pin)) { await removeLogin(old); delete PV.pins[f.id]; }
+  if (!pin) { await savePV(); return; }
+  const cur = PV.pins[f.id];
+  let uidv;
+  if (cur) {
+    if (cur.pin !== pin) { const s = await idt("signInWithPassword", { email, password: cur.pin, returnSecureToken: true }); await idt("update", { idToken: s.idToken, password: pin, returnSecureToken: false }); }
+    uidv = cur.uid;
+  } else {
+    try { uidv = (await idt("signUp", { email, password: pin, returnSecureToken: true })).localId; }
+    catch (e) {
+      if (e.message !== "EMAIL_EXISTS") throw e;
+      uidv = (await idt("signInWithPassword", { email, password: pin, returnSecureToken: true }).catch(() => { throw new Error("A login for flat " + f.no + " already exists with another PIN"); })).localId;
+    }
+  }
+  await fs("PATCH", "members/" + uidv, enc({ code: CODE, role: "owner", flatId: f.id }));
+  PV.pins[f.id] = { pin, uid: uidv, email };
+  await savePV();
+}
+async function removeLogin(o) {
+  try { await fs("DELETE", "members/" + o.uid); } catch (e) {}
+  try { const s = await idt("signInWithPassword", { email: o.email, password: o.pin, returnSecureToken: true }); await idt("delete", { idToken: s.idToken }); } catch (e) {}
+}
+async function saveFlat() {
+  if (!subActive()) return commit();
+  const no = FF.no.trim();
+  if (!no || !slug(no)) return toast("Enter flat no.");
+  if (L("flats").some(f => slug(f.no) === slug(no) && f.id !== FF.id)) return toast("Flat " + no + " already exists");
+  if (FF.amt === "" || !(+FF.amt >= 0)) return toast("Enter monthly amount");
+  const pin = digits(FF.pin) || digits(FF.mobile).slice(-6);
+  if (FF.pin && digits(FF.pin).length < 6) return toast("PIN must be at least 6 digits");
+  if (pin && pin.length < 6) return toast("Mobile too short for PIN — enter a 6-digit PIN");
+  const rec = { id: FF.id || uid(), no, owner: FF.owner.trim(), mobile: FF.mobile.trim(), amt: +FF.amt, start: FF.start || curYM(), ts: Date.now() };
+  if (FF.id) Object.assign(D.flats.find(f => f.id === FF.id), rec); else D.flats.push(rec);
+  const up = !!FF.id; FF = newFF(); commit(up ? "Flat updated" : "Flat added");
+  const p = PV.pins[rec.id];
+  if (pin && (!p || p.pin !== pin || p.email !== ownerEmail(rec.no)) || (!pin && p)) {
+    busy(pin ? "Creating owner login for " + rec.no + "…" : "Removing login…");
+    try { await setOwnerLogin(rec, pin); busy(); render(); if (pin && rec.mobile) ask(`Login ready for Flat <b>${esc(rec.no)}</b><br>PIN: <b>${esc(pin)}</b><br><br>Send login details to ${esc(rec.owner || "owner")} on WhatsApp?`, "Send on WhatsApp", () => waLogin(rec.id)); else toast(pin ? "Login created — PIN " + pin : "Login removed"); }
+    catch (e) { busy(); render(); toast("Login not created: " + e.message); }
+  }
+}
+function waLogin(fid) {
+  const f = flatById(fid), p = PV.pins[fid];
+  if (!p) return toast("Login not set");
+  openWA(f.mobile, `*${D.settings.name}*\n\nDear ${f.owner || "Owner"},\nYour Society Maintenance App login:\n\nLink: ${appURL()}\nSociety Code: *${CODE}*\nFlat No: *${f.no}*\nPIN: *${p.pin}*\n\nSee your payments & receipts, society expenses with bills, and notices.\n— Managing Committee`);
+}
+function bulkAdd() {
+  const amt = +$("#bulkamt").value, names = $("#bulk").value.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+  if (!names.length) return toast("Type flat numbers");
+  if (!(amt > 0)) return toast("Enter monthly amount");
+  const have = new Set(L("flats").map(f => slug(f.no))); let n = 0;
+  names.forEach(no => { if (slug(no) && !have.has(slug(no))) { D.flats.push({ id: uid(), no, owner: "", mobile: "", amt, start: D.settings.start || curYM(), ts: Date.now() }); have.add(slug(no)); n++; } });
+  commit(n + " flats added");
+}
+function editFlat(id) { const f = flatById(id), p = PV.pins[id]; FF = { id, no: f.no, owner: f.owner, mobile: f.mobile, amt: String(f.amt), start: f.start, pin: p ? p.pin : "" }; render(); window.scrollTo(0, 0); }
+function delFlat(id) {
+  const f = flatById(id), n = L("payments").filter(p => p.flatId === id).length;
+  ask(`Delete flat <b>${esc(f.no)}</b>? The owner's login will also be removed.${n ? `<br><br><span class="due">It has ${n} receipt(s). They stay in accounts but will show without a flat.</span>` : ""}`, "Delete", async () => {
+    f.del = true; f.ts = Date.now(); commit("Flat deleted");
+    const p = PV.pins[id]; if (p) { await removeLogin(p); delete PV.pins[id]; savePV().catch(() => {}); render(); }
+  }, true);
+}
+
+/* ----- Reports ----- */
+let RY = new Date().getFullYear();
+function repView() {
+  const admin = S.role === "admin", P = L("payments"), E = L("expenses");
+  const years = new Set([new Date().getFullYear()]); [...P, ...E].forEach(x => x.date && years.add(+x.date.slice(0, 4)));
+  let rows = "", ti = 0, te = 0;
+  for (let i = 1; i <= 12; i++) {
+    const ym = RY + "-" + String(i).padStart(2, "0");
+    const a = sum(P.filter(p => (p.date || "").slice(0, 7) === ym)), b = sum(E.filter(e => (e.date || "").slice(0, 7) === ym));
+    ti += a; te += b;
+    if (a || b) rows += `<tr><td>${ymL(ym)}</td><td class="r ok">${inr(a)}</td><td class="r due">${inr(b)}</td><td class="r">${inr(a - b)}</td></tr>`;
+  }
+  const cm = {}; E.filter(e => (e.date || "").startsWith(RY + "")).forEach(e => cm[e.cat] = (cm[e.cat] || 0) + (+e.amount || 0));
+  const ca = Object.entries(cm).sort((a, b) => b[1] - a[1]), cmax = ca.length ? ca[0][1] : 1;
+  let h = `<div class="bar"><label style="margin:0">Year</label><select style="width:auto" onchange="RY=+this.value;render()">${[...years].sort().map(y => `<option ${y === RY ? "selected" : ""}>${y}</option>`).join("")}</select>
+    <button class="btn sm" onclick="window.print()">🖨 Print / PDF</button>
+    ${admin ? `<button class="btn sm" onclick="csvPay()">⬇ Receipts Excel</button><button class="btn sm" onclick="csvExp()">⬇ Expenses Excel</button>` : ""}</div>
+    ${kpis()}
+    <div class="card"><h3>Month-wise Income & Expense — ${RY}</h3>${rows ? `<div class="tw"><table><thead><tr><th>Month</th><th class="r">Collected</th><th class="r">Spent</th><th class="r">Net</th></tr></thead><tbody>${rows}</tbody>
+    <tfoot><tr><td>Total</td><td class="r">${inr(ti)}</td><td class="r">${inr(te)}</td><td class="r">${inr(ti - te)}</td></tr></tfoot></table></div>` : `<div class="muted">No entries in ${RY}.</div>`}</div>
+    <div class="card"><h3>Where money was used — ${RY}</h3>${ca.length ? `<table><tbody>${ca.map(([c, v]) => `<tr><td style="width:45%">${esc(c)}<div class="cbar" style="width:${Math.max(3, v / cmax * 100)}%"></div></td><td class="r">${inr(v)}</td><td class="r muted small">${te ? Math.round(v / te * 100) : 0}%</td></tr>`).join("")}</tbody></table>` : `<div class="muted">No expenses in ${RY}.</div>`}</div>`;
+  if (admin) {
+    const fl = L("flats").sort(byNo);
+    h += `<div class="card"><h3>Flat-wise Payment Chart — ${RY}</h3><div class="tw"><table><thead><tr><th>Flat</th>${MN.map(m => `<th>${m}</th>`).join("")}</tr></thead><tbody>
+      ${fl.map(f => { const ps = paidSet(f.id), st = f.start || D.settings.start; return `<tr><td style="white-space:nowrap"><b>${esc(f.no)}</b></td>${MN.map((m, i) => { const ym = RY + "-" + String(i + 1).padStart(2, "0"); return `<td style="text-align:center">${ps.has(ym) ? `<span class="ok">✓</span>` : (ym >= st && ym <= curYM() ? `<span class="due">✗</span>` : `<span class="muted">·</span>`)}</td>`; }).join("")}</tr>`; }).join("")}
+      </tbody></table></div></div>`;
+  }
+  return h;
+}
+function csvPay() {
+  const r = [["Receipt", "Date", "Type", "Flat", "Owner", "Months", "Amount", "Mode", "Ref", "Note"]];
+  L("payments").sort((a, b) => (a.date || "").localeCompare(b.date || "")).forEach(p => { const f = flatById(p.flatId); r.push([p.rno, p.date, p.type === "O" ? "Other" : "Maintenance", f ? f.no : "", f ? f.owner : "", (p.months || []).map(ymL).join(" "), p.amount, p.mode, p.ref, p.note]); });
+  downloadCSV("Society_Receipts_" + today() + ".csv", r);
+}
+function csvExp() {
+  const r = [["Date", "Category", "Description", "Paid To", "Amount", "Mode", "Bill No"]];
+  L("expenses").sort((a, b) => (a.date || "").localeCompare(b.date || "")).forEach(e => r.push([e.date, e.cat, e.desc, e.payee, e.amount, e.mode, e.ref]));
+  downloadCSV("Society_Expenses_" + today() + ".csv", r);
+}
+
+/* ----- Settings (admin) ----- */
+function setView() {
+  const s = D.settings;
+  return `<div class="card"><h3>Subscription</h3>
+    <div>Society Code: <b style="font-size:16px">${esc(CODE)}</b></div>
+    ${SUB ? `<div style="margin-top:4px">Valid till <b class="${subActive() ? "ok" : "due"}">${dL(String(SUB.validTill).slice(0, 10))}</b> ${subActive() ? `(${subDaysLeft()} days left)` : "— expired"}</div>` : `<div class="muted small">Status not loaded</div>`}
+    <div class="bar"><button class="btn sm wa" onclick="renewWA()">Renew / Support on WhatsApp</button></div></div>
+    <div class="card"><h3>Society Details</h3>
+    <label>Society Name</label><input id="s_name" value="${esc(s.name)}">
+    <label>Address</label><input id="s_addr" value="${esc(s.address)}">
+    <label>Registration No.</label><input id="s_reg" value="${esc(s.regNo)}">
+    <div class="row"><div><label>Opening Balance ₹</label><input id="s_ob" inputmode="decimal" value="${esc(s.openingBalance)}"></div><div><label>Default dues start month</label><input id="s_st" type="month" value="${esc(s.start)}"></div></div>
+    <label>Expense Categories (one per line)</label><textarea id="s_cats" rows="5">${esc(cats().join("\n"))}</textarea>
+    <button class="btn amb big" onclick="saveSet()">Save Settings</button></div>
+    <div class="card"><h3>My Login</h3><div class="small">Logged in as <b>${esc(AU && AU.email)}</b></div>
+    <div class="row"><div><label>New password</label><input id="np" type="password" autocomplete="new-password"></div><div style="display:flex;align-items:flex-end"><button class="btn pri" style="width:100%" onclick="changePw()">Change</button></div></div></div>
+    <div class="card"><h3>Backup</h3>
+    <div class="bar"><button class="btn sm" onclick="backup()">⬇ Download Backup</button><button class="btn sm" onclick="$('#rf').click()">⬆ Restore Backup</button><input type="file" id="rf" accept=".json" style="display:none" onchange="restore(this)"></div>
+    <div class="bar"><button class="btn sm red" onclick="wipe()">Delete ALL society data</button></div></div>`;
+}
+function saveSet() {
+  Object.assign(D.settings, { name: $("#s_name").value.trim() || "Society", address: $("#s_addr").value.trim(), regNo: $("#s_reg").value.trim(), openingBalance: +$("#s_ob").value || 0, start: $("#s_st").value || curYM(), cats: $("#s_cats").value.split("\n").map(x => x.trim()).filter(Boolean), ts: Date.now() });
+  commit("Settings saved");
+}
+async function changePw() {
+  const p = $("#np").value;
+  if (p.length < 6) return toast("Password must be at least 6 characters");
+  try { busy("Changing password…"); setAuth(await idt("update", { idToken: await token(), password: p, returnSecureToken: true })); busy(); toast("Password changed"); $("#np").value = ""; }
+  catch (e) { busy(); toast(e.message.includes("CREDENTIAL_TOO_OLD") ? "Please logout, login again, then change password" : e.message); }
+}
+function backup() { download(CODE + "_Backup_" + today() + ".json", JSON.stringify(D), "application/json"); }
+function restore(inp) {
+  const file = inp.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => { try { const x = JSON.parse(r.result); if (!x.settings || !x.flats) throw 0; ask("Replace ALL current data with this backup?<br><br><span class='muted small'>Owner logins are not changed.</span>", "Restore", () => { if (!subActive()) return commit(); D = merge(blank(), x); D.settings.ts = Date.now(); D.updatedAt = Date.now(); saveLocal(); render(); push(true); toast("Restored"); }, true); } catch (e) { toast("Not a valid backup file"); } };
+  r.readAsText(file); inp.value = "";
+}
+function wipe() {
+  ask(`This deletes all flats, receipts, expenses and notices of <b>${esc(D.settings.name)}</b> for everyone.<br><br>Type society code <b>${esc(CODE)}</b> to confirm:<input id="wp" style="margin-top:8px" autocapitalize="characters">`, "Delete Everything", () => {}, true);
+  $("#ovok").onclick = () => { if ($("#wp").value.trim().toUpperCase() !== CODE) return toast("Code does not match"); closeOv(); if (!subActive()) return commit(); const s = D.settings; D = blank(); D.settings = Object.assign(s, { ts: Date.now() }); D.updatedAt = Date.now(); saveLocal(); render(); push(true); toast("All data deleted (owner logins kept until flats are re-added)"); };
+}
+/* ---------- boot ---------- */
+if (S && AU) {
+  if (S.role === "super") { TAB = "super"; render(); loadSupers(); }
+  else { CODE = S.code; D = loadLocal() || blank(); render(); refresh(false); }
+} else render();
+setInterval(() => { if (!document.hidden && S && S.role !== "super") refresh(false); }, 60000);
+</script>
+</body>
+</html>
